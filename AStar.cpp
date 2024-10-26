@@ -60,17 +60,17 @@ inline bool CellIsSafe(CellKind cell)
 }
 
 struct Map {
-    static constexpr int MaxX = 9, MaxY = 9;
+    static constexpr int TopX = 9, TopY = 9;
     static std::pair<int, int> Adjacent[4];
 
   private:
-    CellKind v[MaxX][MaxY];
+    CellKind v[TopX][TopY];
 
   public:
-    void ResetMap() { std::fill_n(&v[0][0], MaxX * MaxY, CellKind::Unknown); }
+    void ResetMap() { std::fill_n(&v[0][0], TopX * TopY, CellKind::Unknown); }
     Map() { ResetMap(); }
     inline static bool ValidateCell(int x, int y) {
-        return x >= 0 && x < MaxX && y >= 0 && y < MaxY;
+        return x >= 0 && x < TopX && y >= 0 && y < TopY;
     }
     std::vector<std::pair<int, int>> SafePath(int x1, int y1, int x2, int y2);
     void Set(int x, int y, CellKind cell)
@@ -98,9 +98,9 @@ std::vector<std::pair<int, int>> Map::SafePath(int x1, int y1, int x2, int y2)
 {
     using namespace std;
     set<Node, NodeAStarOrder> pq;
-    Node nodes[MaxX][MaxY];
-    for (int i = 0; i < MaxX; i++)
-        for (int j = 0; j < MaxY; j++)
+    Node nodes[TopX][TopY];
+    for (int i = 0; i < TopX; i++)
+        for (int j = 0; j < TopY; j++)
         {
             Node& nd = nodes[i][j];
             nd.x = i;
@@ -184,10 +184,10 @@ int main() {
     int variant;
     std::cin >> variant;
     int targetx, targety; std::cin >> targetx >> targety;
-    Node nodes[Map::MaxX][Map::MaxY];
+    Node nodes[Map::TopX][Map::TopY];
     std::set<Node, NodeAStarOrder> pq;
-    for (int i = 0; i < Map::MaxX; i++)
-        for (int j = 0; j < Map::MaxY; j++)
+    for (int i = 0; i < Map::TopX; i++)
+        for (int j = 0; j < Map::TopY; j++)
         {
             Node& nd = nodes[i][j];
             nd.x = i;
