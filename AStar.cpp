@@ -31,9 +31,8 @@ enum class CellKind {
     Empty = 0,
     Percepted = 2,
     Agent = 4,
-    Key = 8,
-    Sentinel = 16,
-    Keymaker = 32,
+    Sentinel = 8,
+    Keymaker = 16,
 };
 
 CellKind CellKindFromChar(char ch)

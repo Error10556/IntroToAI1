@@ -1,8 +1,6 @@
 #include <algorithm>
 #include <iostream>
 #include <queue>
-#include <set>
-#include <vector>
 
 inline int ManhattanDistance(int x1, int y1, int x2, int y2) {
     return abs(x1 - x2) + abs(y1 - y2);
@@ -89,7 +87,8 @@ int Map::ShortestSafePath(int x1, int y1, int x2, int y2)
             int ny = y + p.second;
             if (nx == x2 && ny == y2)
                 return newdist;
-            if (ValidateCell(nx, ny) && CellIsSafe(v[nx][ny]))
+            if (ValidateCell(nx, ny) && dists[nx][ny] == -1
+                    && CellIsSafe(v[nx][ny]))
             {
                 dists[nx][ny] = newdist;
                 q.emplace(nx, ny);
