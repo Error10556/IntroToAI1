@@ -9,7 +9,7 @@ inline int ManhattanDistance(int x1, int y1, int x2, int y2) {
 enum class CellKind {
     Unknown = 1,
     Empty = 0,
-    Percepted = 2,
+    Perceived = 2,
     Agent = 4,
     Key = 8,
     Sentinel = 16,
@@ -19,7 +19,7 @@ enum class CellKind {
 CellKind CellKindFromChar(char ch) {
     switch (ch) {
     case 'P':
-        return CellKind::Percepted;
+        return CellKind::Perceived;
     case 'A':
         return CellKind::Agent;
     case 'B':
@@ -42,16 +42,16 @@ struct Map {
     static std::pair<int, int> Adjacent[4];
 
   private:
-    CellKind v[MaxX + 1][MaxY + 1];
+    CellKind v[MaxX][MaxY];
 
   public:
     void ResetMap() {
-        std::fill_n(&v[0][0], (MaxX + 1) * (MaxY + 1), CellKind::Unknown);
+        std::fill_n(&v[0][0], MaxX * MaxY, CellKind::Unknown);
     }
     int ShortestSafePath(int x1, int y1, int x2, int y2);
     Map() { ResetMap(); }
     inline static bool ValidateCell(int x, int y) {
-        return x >= 0 && x <= MaxX && y >= 0 && y <= MaxY;
+        return x >= 0 && x < MaxX && y >= 0 && y < MaxY;
     }
     void Set(int x, int y, CellKind cell) {
         if (ValidateCell(x, y))
@@ -68,8 +68,8 @@ struct Map {
 
 int Map::ShortestSafePath(int x1, int y1, int x2, int y2)
 {
-    int dists[MaxX + 1][MaxY + 1];
-    std::fill_n(&dists[0][0], (MaxX + 1) * (MaxY + 1), -1);
+    int dists[MaxX][MaxY];
+    std::fill_n(&dists[0][0], MaxX * MaxY, -1);
     dists[x1][y1] = 0;
     int x = x1, y = y1;
     std::queue<std::pair<int, int>> q;
@@ -125,7 +125,7 @@ void MakeMoveAndRead(Map &mp, int newx, int newy, int radius) {
     ReadSurroundings(mp, newx, newy, radius);
 }
 
-bool visited[Map::MaxX + 1][Map::MaxY + 1]{};
+bool visited[Map::MaxX][Map::MaxY]{};
 
 void DFS(Map &mp, int x, int y, int visionRadius) {
     visited[x][y] = true;

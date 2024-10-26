@@ -29,7 +29,7 @@ struct NodeAStarOrder {
 enum class CellKind {
     Unknown = 1,
     Empty = 0,
-    Percepted = 2,
+    Perceived = 2,
     Agent = 4,
     Sentinel = 8,
     Keymaker = 16,
@@ -40,7 +40,7 @@ CellKind CellKindFromChar(char ch)
     switch (ch)
     {
     case 'P':
-        return CellKind::Percepted;
+        return CellKind::Perceived;
     case 'A':
         return CellKind::Agent;
     case 'B':
@@ -64,13 +64,13 @@ struct Map {
     static std::pair<int, int> Adjacent[4];
 
   private:
-    CellKind v[MaxX + 1][MaxY + 1];
+    CellKind v[MaxX][MaxY];
 
   public:
-    void ResetMap() { std::fill_n(&v[0][0], (MaxX + 1) * (MaxY + 1), CellKind::Unknown); }
+    void ResetMap() { std::fill_n(&v[0][0], MaxX * MaxY, CellKind::Unknown); }
     Map() { ResetMap(); }
     inline static bool ValidateCell(int x, int y) {
-        return x >= 0 && x <= MaxX && y >= 0 && y <= MaxY;
+        return x >= 0 && x < MaxX && y >= 0 && y < MaxY;
     }
     std::vector<std::pair<int, int>> SafePath(int x1, int y1, int x2, int y2);
     void Set(int x, int y, CellKind cell)
@@ -98,9 +98,9 @@ std::vector<std::pair<int, int>> Map::SafePath(int x1, int y1, int x2, int y2)
 {
     using namespace std;
     set<Node, NodeAStarOrder> pq;
-    Node nodes[MaxX + 1][MaxY + 1];
-    for (int i = 0; i <= MaxX; i++)
-        for (int j = 0; j <= MaxY; j++)
+    Node nodes[MaxX][MaxY];
+    for (int i = 0; i < MaxX; i++)
+        for (int j = 0; j < MaxY; j++)
         {
             Node& nd = nodes[i][j];
             nd.x = i;
@@ -184,10 +184,10 @@ int main() {
     int variant;
     std::cin >> variant;
     int targetx, targety; std::cin >> targetx >> targety;
-    Node nodes[Map::MaxX + 1][Map::MaxY + 1];
+    Node nodes[Map::MaxX][Map::MaxY];
     std::set<Node, NodeAStarOrder> pq;
-    for (int i = 0; i <= Map::MaxX; i++)
-        for (int j = 0; j <= Map::MaxY; j++)
+    for (int i = 0; i < Map::MaxX; i++)
+        for (int j = 0; j < Map::MaxY; j++)
         {
             Node& nd = nodes[i][j];
             nd.x = i;
@@ -215,7 +215,7 @@ int main() {
             int ny = y + p.second;
             if (Map::ValidateCell(nx, ny) && CellIsSafe(mp.Cell(nx, ny)))
             {
-                Node &cur = nodes[x][y];
+                Node &cur = nodes[nx][ny];
                 if (cur.dist == -1) {
                     cur.dist = newdist;
                     cur.heuristic = ManhattanDistance(x, y, targetx, targety);
@@ -261,5 +261,5 @@ int main() {
         pq.erase(iters[bestindex]);
         MoveTo(nexts[bestindex].first, nexts[bestindex].second);
     }
-    std::cout << "e " << nodes[targetx][targety].dist;
+    std::cout << "e " << nodes[targetx][targety].dist << std::endl;
 }

@@ -1,3 +1,5 @@
+all: AStar.bin Back.bin interactor.bin
+
 AStar.bin: AStar.cpp
 	clang++ -std=c++11 AStar.cpp -o AStar.bin
 
