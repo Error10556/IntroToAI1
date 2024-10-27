@@ -1,4 +1,4 @@
-all: AStar.bin Back.bin interactor.bin testgen.bin
+all: AStar.bin Back.bin interactor.bin testgen.bin tester.bin
 
 AStar.bin: AStar.cpp
 	clang++ -std=c++11 AStar.cpp -o AStar.bin
@@ -11,6 +11,9 @@ interactor.bin: interactor.cpp launcher.cpp launcher.h interactorMap.h interacto
 
 testgen.bin: testgen.cpp interactorMap.h interactorMap.cpp
 	clang++ -std=c++20 testgen.cpp interactorMap.cpp -o testgen.bin
+
+tester.bin: tester.cpp launcher.h launcher.cpp
+	clang++ -std=c++20 tester.cpp launcher.cpp -o tester.bin
 
 clean:
 	rm $(wildcard *.bin)

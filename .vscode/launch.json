@@ -8,7 +8,12 @@
             "preLaunchTask": "Compile",
             "postDebugTask": "Clean",
             "expressions": "native",
-            "program": "${workspaceFolder}/${fileBasenameNoExtension}"
+            "program": "${workspaceFolder}/${fileBasenameNoExtension}",
+            "args": [
+                "AStar.bin",
+                "interactor.bin",
+                "tests"
+            ]
         }
     ]
 }
