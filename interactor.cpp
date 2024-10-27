@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include "launcher.h"
 using namespace std;
 
 enum class CellKind {
@@ -172,25 +173,8 @@ int main(int argc, char **argv) {
             argv[i] = argv[i + 1];
         argc--;
     }
-    int tochild[2];
-    int fromchild[2];
-    pipe(tochild);
-    pipe(fromchild);
-    pid_t childproc = fork();
-    if (!childproc) {
-        close(tochild[1]);
-        close(fromchild[0]);
-        dup2(tochild[0], 0);
-        dup2(fromchild[1], 1);
-        char *childargs[2] = {argv[1], 0};
-        char *envp = 0;
-        execve(argv[1], childargs, &envp);
-        return 0;
-    }
-    close(tochild[0]);
-    close(fromchild[1]);
-    FILE *childw = fdopen(tochild[1], "w");
-    FILE *childr = fdopen(fromchild[0], "r");
+    Process child(argv[1], {}, {});
+    FILE* childw = child.StdIN(), * childr = child.StdOUT();
     ifstream fs(argv[2]);
     Map mp(fs);
     cout << "Running " << argv[2] << endl;
@@ -263,8 +247,8 @@ int main(int argc, char **argv) {
         }
     }
     if (!ok)
-        kill(childproc, SIGKILL);
+        child.Kill();
     else
-        wait(NULL);
+        child.Wait();
     return !ok;
 }
