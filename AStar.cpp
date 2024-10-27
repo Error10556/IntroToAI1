@@ -301,7 +301,7 @@ int main()
             if (cur.dist == -1)
             {
                 cur.dist = newdist;
-                cur.heuristic = ManhattanDistance(x, y, targetx, targety);
+                cur.heuristic = ManhattanDistance(nx, ny, targetx, targety);
                 cur.back = &nodes[curx][cury];
                 pq.insert(cur);
             }
