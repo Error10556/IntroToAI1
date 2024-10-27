@@ -1,32 +1,44 @@
 #include <algorithm>
 #include <iostream>
 #include <set>
-#include <vector>
 #include <tuple>
+#include <vector>
 
-inline int ManhattanDistance(int x1, int y1, int x2, int y2) {
+inline int ManhattanDistance(int x1, int y1, int x2, int y2)
+{
     return abs(x1 - x2) + abs(y1 - y2);
 }
 
-struct Node {
+struct Node
+{
     int x, y;
-    Node *back = nullptr;
+    Node* back = nullptr;
     int dist;
     int heuristic;
-    Node() : Node(0, 0, 0, 0) {}
+    Node() : Node(0, 0, 0, 0)
+    {
+    }
     Node(int x, int y, int dist, int heuristic)
-        : x(x), y(y), dist(dist), heuristic(dist + heuristic) {}
-    inline int Estimate() const { return dist + heuristic; }
+        : x(x), y(y), dist(dist), heuristic(dist + heuristic)
+    {
+    }
+    inline int Estimate() const
+    {
+        return dist + heuristic;
+    }
 };
 
-struct NodeAStarOrder {
-    bool operator()(const Node &a, const Node &b) const {
+struct NodeAStarOrder
+{
+    bool operator()(const Node& a, const Node& b) const
+    {
         int ae = a.Estimate(), be = b.Estimate();
         return std::tie(ae, a.x, a.y) < std::tie(be, b.x, b.y);
     }
 };
 
-enum class CellKind {
+enum class CellKind
+{
     Unknown = 1,
     Empty = 0,
     Perceived = 2,
@@ -55,21 +67,29 @@ CellKind CellKindFromChar(char ch)
 
 inline bool CellIsSafe(CellKind cell)
 {
-    return (static_cast<int>(cell) & ~(static_cast<int>(CellKind::Keymaker)))
-        == 0;
+    return (static_cast<int>(cell) & ~(static_cast<int>(CellKind::Keymaker))) ==
+           0;
 }
 
-struct Map {
+struct Map
+{
     static constexpr int TopX = 9, TopY = 9;
     static std::pair<int, int> Adjacent[4];
 
-  private:
+private:
     CellKind v[TopX][TopY];
 
-  public:
-    void ResetMap() { std::fill_n(&v[0][0], TopX * TopY, CellKind::Unknown); }
-    Map() { ResetMap(); }
-    inline static bool ValidateCell(int x, int y) {
+public:
+    void ResetMap()
+    {
+        std::fill_n(&v[0][0], TopX * TopY, CellKind::Unknown);
+    }
+    Map()
+    {
+        ResetMap();
+    }
+    inline static bool ValidateCell(int x, int y)
+    {
         return x >= 0 && x < TopX && y >= 0 && y < TopY;
     }
     std::vector<std::pair<int, int>> SafePath(int x1, int y1, int x2, int y2);
@@ -86,7 +106,7 @@ struct Map {
     {
         if (ValidateCell(x, y))
             v[x][y] = static_cast<CellKind>(static_cast<int>(v[x][y]) |
-                    static_cast<int>(cell));
+                                            static_cast<int>(cell));
     }
     inline CellKind Cell(int x, int y)
     {
@@ -109,7 +129,8 @@ std::vector<std::pair<int, int>> Map::SafePath(int x1, int y1, int x2, int y2)
         }
     nodes[x1][y1] = Node(x1, y1, 0, ManhattanDistance(x1, y1, x2, y2));
     pq.insert(nodes[x1][y1]);
-    while (pq.size()) {
+    while (pq.size())
+    {
         auto begin = pq.begin();
         Node cur = *begin;
         int curx = cur.x;
@@ -118,19 +139,23 @@ std::vector<std::pair<int, int>> Map::SafePath(int x1, int y1, int x2, int y2)
             break;
         pq.erase(begin);
         int newdist = cur.dist + 1;
-        for (auto d : Adjacent) {
+        for (auto d : Adjacent)
+        {
             int x = curx + d.first;
             int y = cury + d.second;
             if (!(x == x2 && y == y2) &&
-                    !(ValidateCell(x, y) && CellIsSafe(v[x][y])))
+                !(ValidateCell(x, y) && CellIsSafe(v[x][y])))
                 continue;
-            Node &cur = nodes[x][y];
-            if (cur.dist == -1) {
+            Node& cur = nodes[x][y];
+            if (cur.dist == -1)
+            {
                 cur.dist = newdist;
                 cur.heuristic = ManhattanDistance(x, y, x2, y2);
                 cur.back = &nodes[curx][cury];
                 pq.insert(cur);
-            } else if (cur.dist > newdist) {
+            }
+            else if (cur.dist > newdist)
+            {
                 pq.erase(cur);
                 cur.dist = newdist;
                 cur.back = &nodes[curx][cury];
@@ -138,7 +163,7 @@ std::vector<std::pair<int, int>> Map::SafePath(int x1, int y1, int x2, int y2)
             }
         }
     }
-    Node &fin = nodes[x2][y2];
+    Node& fin = nodes[x2][y2];
     if (fin.dist == -1)
         return {};
     vector<pair<int, int>> res;
@@ -164,10 +189,12 @@ void ReadSurroundings(Map& mp, int x, int y, int radius)
     for (int i = -radius; i <= radius; i++)
         for (int j = -radius; j <= radius; j++)
             mp.ClearCell(x + i, y + j);
-    int n; std::cin >> n;
+    int n;
+    std::cin >> n;
     while (n--)
     {
-        int x, y; char type;
+        int x, y;
+        char type;
         std::cin >> x >> y >> type;
         CellKind kind = CellKindFromChar(type);
         mp.Add(x, y, kind);
@@ -180,10 +207,12 @@ void MakeMoveAndRead(Map& mp, int newx, int newy, int radius)
     ReadSurroundings(mp, newx, newy, radius);
 }
 
-int main() {
+int main()
+{
     int variant;
     std::cin >> variant;
-    int targetx, targety; std::cin >> targetx >> targety;
+    int targetx, targety;
+    std::cin >> targetx >> targety;
     Node nodes[Map::TopX][Map::TopY];
     std::set<Node, NodeAStarOrder> pq;
     for (int i = 0; i < Map::TopX; i++)
@@ -215,13 +244,16 @@ int main() {
             int ny = y + p.second;
             if (Map::ValidateCell(nx, ny) && CellIsSafe(mp.Cell(nx, ny)))
             {
-                Node &cur = nodes[nx][ny];
-                if (cur.dist == -1) {
+                Node& cur = nodes[nx][ny];
+                if (cur.dist == -1)
+                {
                     cur.dist = newdist;
                     cur.heuristic = ManhattanDistance(x, y, targetx, targety);
                     cur.back = &nodes[curx][cury];
                     pq.insert(cur);
-                } else if (cur.dist > newdist) {
+                }
+                else if (cur.dist > newdist)
+                {
                     pq.erase(cur);
                     cur.dist = newdist;
                     cur.back = &nodes[curx][cury];

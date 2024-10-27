@@ -39,7 +39,7 @@ Process::Process(const string& filename, vector<string> argv,
 
 Process::Process(const string& filename, const vector<string>& argv,
                  const vector<string>& env)
-    : Process(filename, argv, env, [](void*){}, 0)
+    : Process(filename, argv, env, [](void*) {}, 0)
 {
 }
 

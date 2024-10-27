@@ -2,11 +2,13 @@
 #include <iostream>
 #include <queue>
 
-inline int ManhattanDistance(int x1, int y1, int x2, int y2) {
+inline int ManhattanDistance(int x1, int y1, int x2, int y2)
+{
     return abs(x1 - x2) + abs(y1 - y2);
 }
 
-enum class CellKind {
+enum class CellKind
+{
     Unknown = 1,
     Empty = 0,
     Perceived = 2,
@@ -16,8 +18,10 @@ enum class CellKind {
     Keymaker = 32,
 };
 
-CellKind CellKindFromChar(char ch) {
-    switch (ch) {
+CellKind CellKindFromChar(char ch)
+{
+    switch (ch)
+    {
     case 'P':
         return CellKind::Perceived;
     case 'A':
@@ -32,38 +36,53 @@ CellKind CellKindFromChar(char ch) {
     return CellKind::Empty;
 }
 
-inline bool CellIsSafe(CellKind cell) {
+inline bool CellIsSafe(CellKind cell)
+{
     return (static_cast<int>(cell) & ~(static_cast<int>(CellKind::Keymaker))) ==
            0;
 }
 
-struct Map {
+struct Map
+{
     static constexpr int TopX = 9, TopY = 9;
     static std::pair<int, int> Adjacent[4];
 
-  private:
+private:
     CellKind v[TopX][TopY];
 
-  public:
-    void ResetMap() {
+public:
+    void ResetMap()
+    {
         std::fill_n(&v[0][0], TopX * TopY, CellKind::Unknown);
     }
     int ShortestSafePath(int x1, int y1, int x2, int y2);
-    Map() { ResetMap(); }
-    inline static bool ValidateCell(int x, int y) {
+    Map()
+    {
+        ResetMap();
+    }
+    inline static bool ValidateCell(int x, int y)
+    {
         return x >= 0 && x < TopX && y >= 0 && y < TopY;
     }
-    void Set(int x, int y, CellKind cell) {
+    void Set(int x, int y, CellKind cell)
+    {
         if (ValidateCell(x, y))
             v[x][y] = cell;
     }
-    inline void ClearCell(int x, int y) { Set(x, y, CellKind::Empty); }
-    void Add(int x, int y, CellKind cell) {
+    inline void ClearCell(int x, int y)
+    {
+        Set(x, y, CellKind::Empty);
+    }
+    void Add(int x, int y, CellKind cell)
+    {
         if (ValidateCell(x, y))
             v[x][y] = static_cast<CellKind>(static_cast<int>(v[x][y]) |
                                             static_cast<int>(cell));
     }
-    inline CellKind Cell(int x, int y) { return v[x][y]; }
+    inline CellKind Cell(int x, int y)
+    {
+        return v[x][y];
+    }
 };
 
 int Map::ShortestSafePath(int x1, int y1, int x2, int y2)
@@ -87,8 +106,8 @@ int Map::ShortestSafePath(int x1, int y1, int x2, int y2)
             int ny = y + p.second;
             if (nx == x2 && ny == y2)
                 return newdist;
-            if (ValidateCell(nx, ny) && dists[nx][ny] == -1
-                    && CellIsSafe(v[nx][ny]))
+            if (ValidateCell(nx, ny) && dists[nx][ny] == -1 &&
+                CellIsSafe(v[nx][ny]))
             {
                 dists[nx][ny] = newdist;
                 q.emplace(nx, ny);
@@ -105,13 +124,15 @@ std::pair<int, int> Map::Adjacent[] = {
     {0, -1},
 };
 
-void ReadSurroundings(Map &mp, int x, int y, int radius) {
+void ReadSurroundings(Map& mp, int x, int y, int radius)
+{
     for (int i = -radius; i <= radius; i++)
         for (int j = -radius; j <= radius; j++)
             mp.ClearCell(x + i, y + j);
     int n;
     std::cin >> n;
-    while (n--) {
+    while (n--)
+    {
         int x, y;
         char type;
         std::cin >> x >> y >> type;
@@ -120,20 +141,23 @@ void ReadSurroundings(Map &mp, int x, int y, int radius) {
     }
 }
 
-void MakeMoveAndRead(Map &mp, int newx, int newy, int radius) {
+void MakeMoveAndRead(Map& mp, int newx, int newy, int radius)
+{
     std::cout << "m " << newx << ' ' << newy << std::endl;
     ReadSurroundings(mp, newx, newy, radius);
 }
 
 bool visited[Map::TopX][Map::TopY]{};
 
-void DFS(Map &mp, int x, int y, int visionRadius) {
+void DFS(Map& mp, int x, int y, int visionRadius)
+{
     visited[x][y] = true;
-    for (auto &p : Map::Adjacent) {
+    for (auto& p : Map::Adjacent)
+    {
         int nx = x + p.first;
         int ny = y + p.second;
-        if (!Map::ValidateCell(nx, ny) || !CellIsSafe(mp.Cell(nx, ny))
-                || visited[nx][ny])
+        if (!Map::ValidateCell(nx, ny) || !CellIsSafe(mp.Cell(nx, ny)) ||
+            visited[nx][ny])
             continue;
         MakeMoveAndRead(mp, nx, ny, visionRadius);
         DFS(mp, nx, ny, visionRadius);
@@ -145,10 +169,11 @@ int main()
 {
     int variant;
     std::cin >> variant;
-    int targetx, targety; std::cin >> targetx >> targety;
+    int targetx, targety;
+    std::cin >> targetx >> targety;
     Map mp;
     MakeMoveAndRead(mp, 0, 0, variant);
     DFS(mp, 0, 0, variant);
     std::cout << "e " << mp.ShortestSafePath(0, 0, targetx, targety)
-        << std::endl;
+              << std::endl;
 }
