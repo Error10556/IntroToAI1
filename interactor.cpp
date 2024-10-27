@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <chrono>
 using namespace std;
 
 enum class CellKind
@@ -191,21 +192,23 @@ int main(int argc, char** argv)
 {
     if (argc <= 2)
     {
-        cout << "Usage: interactor [-s] program.bin testfile.txt" << endl;
+        cout << "Usage: interactor [-io] [-stats] program.bin testfile.txt" << endl;
         return 0;
     }
-    bool showio = strcmp(argv[1], "-s") == 0;
-    if (showio)
+    bool showio = false;
+    bool stats = false;
+    int argsstart = 1;
+    for (; argsstart < argc && argv[argsstart][0] == '-'; argsstart++)
     {
-        for (int i = 1; i < argc - 1; i++)
-            argv[i] = argv[i + 1];
-        argc--;
+        if (strcmp(argv[argsstart], "-io") == 0)
+            showio = true;
+        else if (strcmp(argv[argsstart], "-stats") == 0)
+            stats = true;
     }
-    Process child(argv[1], {}, {});
+    Process child(argv[argsstart], {}, {});
     FILE *childw = child.StdIN(), *childr = child.StdOUT();
-    ifstream fs(argv[2]);
+    ifstream fs(argv[argsstart + 1]);
     Map mp(fs);
-    cout << "Running " << argv[2] << endl;
     fs.close();
     fprintf(childw, "%d\n", mp.Radius());
     if (showio)
@@ -219,6 +222,14 @@ int main(int argc, char** argv)
     fflush(childw);
     bool ok = true;
     int prevx = 0, prevy = 0;
+    int nmoves = 0;
+    chrono::steady_clock* clock = nullptr;
+    decltype(clock->now()) start;
+    if (stats)
+    {
+        clock = new chrono::steady_clock();
+        start = clock->now();
+    }
     while (true)
     {
         char cmd;
@@ -228,6 +239,7 @@ int main(int argc, char** argv)
         } while (isspace(cmd));
         if (cmd == 'm')
         {
+            nmoves++;
             int x, y;
             fscanf(childr, "%d%d", &x, &y);
             if (showio)
@@ -290,5 +302,16 @@ int main(int argc, char** argv)
         child.Kill();
     else
         child.Wait();
+    if (stats)
+    {
+        cout << "Stats:\n";
+        auto end = clock->now();
+        delete clock;
+        chrono::duration dur = end - start;
+        using rat = decltype(dur)::period;
+        long long us = (long long)dur.count() * rat::num * (int)1e6 / rat::den;
+        cout << "time_us:" << us << '\n';
+        cout << "moves:" << nmoves << endl;
+    }
     return !ok;
 }
