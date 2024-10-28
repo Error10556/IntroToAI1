@@ -1,4 +1,4 @@
-all: AStar.bin Back.bin interactor.bin testgen.bin tester.bin shortestPathLength.bin
+all: AStar.bin Back.bin interactor.bin testgen.bin tester.bin shortestPathLength.bin testVisualizer.bin
 
 AStar.bin: AStar.cpp
 	clang++ -std=c++11 AStar.cpp -o AStar.bin
@@ -17,6 +17,9 @@ tester.bin: tester.cpp launcher.h launcher.cpp
 
 shortestPathLength.bin: shortestPathLength.cpp interactorMap.h interactorMap.cpp
 	clang++ -std=c++20 shortestPathLength.cpp interactorMap.cpp -o shortestPathLength.bin
+
+testVisualizer.bin: testVisualizer.cpp interactorMap.h interactorMap.cpp
+	clang++ -std=c++20 testVisualizer.cpp interactorMap.cpp -o testVisualizer.bin
 
 clean:
 	rm $(wildcard *.bin)

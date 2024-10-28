@@ -42,4 +42,8 @@ public:
     bool CellIsSafe(int x, int y) const;
     int Radius() const;
     int Solution() const;
+    inline CellKind Cell(int x, int y)
+    {
+        return v[x][y];
+    }
 };

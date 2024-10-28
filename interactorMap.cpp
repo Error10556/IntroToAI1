@@ -5,6 +5,8 @@ using namespace std;
 
 char KindToChar(CellKind cell)
 {
+    if (((int)cell & ~(int)CellKind::Perceived) != 0)
+        cell = (CellKind)((int)cell & ~(int)CellKind::Perceived);
     switch (cell)
     {
     case CellKind::Empty:
