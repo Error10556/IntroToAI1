@@ -25,7 +25,6 @@ public:
     }
 
 private:
-    int radius;
     CellKind v[MaxX][MaxY];
     inline void AddCellKind(int x, int y, CellKind ck)
     {
@@ -37,10 +36,9 @@ private:
 public:
     Map(std::istream& in);
     std::pair<int, int> KeymakerCoords() const;
-    std::vector<std::pair<std::pair<int, int>, char>> Vision(int x,
-                                                             int y) const;
+    std::vector<std::pair<std::pair<int, int>, char>> Vision(int x, int y,
+                                                             int radius) const;
     bool CellIsSafe(int x, int y) const;
-    int Radius() const;
     int Solution() const;
     inline CellKind Cell(int x, int y)
     {

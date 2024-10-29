@@ -31,16 +31,14 @@ template <class T> void quickremove(vector<T>& v, int index)
     v.pop_back();
 }
 
-void RenderMap(stringstream& output, int variant, string* ans)
+void RenderMap(stringstream& output, string* ans)
 {
-    output << variant;
     for (int i = 0; i < 9; i++)
         output << '\n' << ans[i];
 }
 
 stringstream GenerateTestcase()
 {
-    int variant = randint(2) + 1;
     int nobstacles = randint(3, 12);
     vector<pair<int, int>> allcoords(81);
     for (int i = 0; i < 9; i++)
@@ -59,7 +57,7 @@ stringstream GenerateTestcase()
     for (auto& p : chosen)
         ans[p.second][p.first] = randint(2) ? 'A' : 'S';
     stringstream ss;
-    RenderMap(ss, variant, ans);
+    RenderMap(ss, ans);
     Map proto(ss);
     ss.seekg(0);
     ss.seekp(0);
@@ -77,7 +75,7 @@ stringstream GenerateTestcase()
     pair<int, int> keymaker = allcoords[randint(allcoords.size())];
     ans[key.second][key.first] = 'B';
     ans[keymaker.second][keymaker.first] = 'K';
-    RenderMap(ss, variant, ans);
+    RenderMap(ss, ans);
     return ss;
 }
 

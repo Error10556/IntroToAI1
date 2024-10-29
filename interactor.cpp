@@ -1,19 +1,21 @@
+#include "interactorMap.h"
 #include "launcher.h"
 #include <bits/stdc++.h>
 #include <cctype>
+#include <chrono>
 #include <cstdio>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <chrono>
-#include "interactorMap.h"
 using namespace std;
 
 int main(int argc, char** argv)
 {
     if (argc <= 2)
     {
-        cout << "Usage: interactor [-io] [-stats] program.bin testfile.txt" << endl;
+        cout << "Usage: interactor [-io] [-stats] program.bin testfile.txt "
+                "variant"
+             << endl;
         return 0;
     }
     bool showio = false;
@@ -31,9 +33,10 @@ int main(int argc, char** argv)
     ifstream fs(argv[argsstart + 1]);
     Map mp(fs);
     fs.close();
-    fprintf(childw, "%d\n", mp.Radius());
+    int radius = atoi(argv[argsstart + 2]);
+    fprintf(childw, "%d\n", radius);
     if (showio)
-        cout << mp.Radius() << endl;
+        cout << radius << endl;
     {
         auto km = mp.KeymakerCoords();
         fprintf(childw, "%d %d\n", km.first, km.second);
@@ -80,7 +83,7 @@ int main(int argc, char** argv)
             }
             prevx = x;
             prevy = y;
-            auto vis = mp.Vision(x, y);
+            auto vis = mp.Vision(x, y, radius);
             fprintf(childw, "%d\n", (int)vis.size());
             if (showio)
                 cout << vis.size() << endl;

@@ -61,7 +61,6 @@ void Map::ChebyshevPerception(int x, int y, int d)
 Map::Map(istream& in)
 {
     fill_n(&v[0][0], MaxX * MaxY, CellKind::Empty);
-    in >> radius;
     for (int i = 0; i < MaxY; i++)
     {
         string s;
@@ -96,7 +95,7 @@ pair<int, int> Map::KeymakerCoords() const
     return {-1, -1};
 }
 
-vector<pair<pair<int, int>, char>> Map::Vision(int x, int y) const
+vector<pair<pair<int, int>, char>> Map::Vision(int x, int y, int radius) const
 {
     std::vector<std::pair<std::pair<int, int>, char>> res;
     int endx = min(MaxX - 1, x + radius);
@@ -118,11 +117,6 @@ vector<pair<pair<int, int>, char>> Map::Vision(int x, int y) const
 bool Map::CellIsSafe(int x, int y) const
 {
     return ValidateCell(x, y) && ::CellIsSafe(v[x][y]);
-}
-
-int Map::Radius() const
-{
-    return radius;
 }
 
 int Map::Solution() const
