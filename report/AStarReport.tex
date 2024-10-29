@@ -551,26 +551,26 @@ A total of $1000$ tests were generated, out of which exactly 10 have no path to 
 \subsection{Algorithm comparison}
 The assignment does not give the definition of ``wins" and ``losses". To disambiguate, we shall call a ``loss" the situation where the Actor dies, or tries to make an invalid move, or gives a wrong answer. A ``win" shall be the opposite. We shall list the number of tests where an algorithm could not find a safe path to the Keymaker as a separate characteristic.
 
-\begin{longtable}[c]{|c|c|c|c|}
+\begin{longtable}[c]{|c|c|c|c|c|c|}
 	\hline
-	\multicolumn{2}{|c|}{} & \textbf{A*} & \textbf{Backtracking}\\
+	\multicolumn{2}{|c|}{} & \textbf{A* (variant 1)} & \textbf{A* (variant 2)} & \textbf{Backtracking (v. 1)} & \textbf{Backtracking (v. 2)}\\
 	\hline
 	\endhead
-	\multicolumn{4}{|c|}{...}\\ \endfoot
+	\multicolumn{6}{|c|}{...}\\ \endfoot
 	\endlastfoot
-	\multirow{4}{3cm}{Execution time, $\mu s$} & Mean & 1261.51 & 2593.16\\\cline{2-4}
-	& Mode & 1196 (8 times) & 2298 (4 times)\\\cline{2-4}
-	& Median & 1209.5 & 2707\\\cline{2-4}
-	& SD & 244.36 & 493.59\\\hline
-	\multirow{4}{3cm}{Number of moves} & Mean & 11.47 & 92.81\\\cline{2-4}
-	& Mode & 6 (87 times) & 117 (44 times)\\\cline{2-4}
-	& Median & 8 & 101\\\cline{2-4}
-	& SD & 11.46 & 30.01\\\hline
-	\multicolumn{2}{|c|}{Number of wins (correct answers)} & 1000 (100\%) & 1000 (100\%)\\\hline
-	\multicolumn{2}{|c|}{Number of losses (failed tests)} & 0 (0\%) & 0 (0\%) \\\hline
-	\multicolumn{2}{|c|}{Number of tests with a positive answer} & 990 (99\%) & 990 (99\%)\\\hline
-	\multicolumn{2}{|c|}{Number of tests with answer \texttt{-1}} & 10 (1\%) & 10 (1\%) \\\hline
-	
+	\multirow{4}{3cm}{Execution time, $\mu s$} & Mean & 1243.06 & 1259.61 & - & - \\\cline{2-6}
+	& Mode & 1280 (7 times) & 1088 (6 times) & - & - \\\cline{2-6}
+	& Median & 1201 & 1214.5 & - & - \\\cline{2-6}
+	& SD & 223.19 & 241.83 & - & - \\\hline
+	\multirow{4}{3cm}{Number of moves} & Mean & 11.35 & 11.35 & - & - \\\cline{2-6}
+	& Mode & 9 (88 times) & 9 (88 times) & - & - \\\cline{2-6}
+	& Median & 8 & 8 & - & - \\\cline{2-6}
+	& SD & 10.73 & 10.73 & - & - \\\hline
+	\multicolumn{2}{|c|}{Number of wins (correct answers)} & 1000 (100\%) & 1000 (100\%) & - & - \\\hline
+	\multicolumn{2}{|c|}{Number of losses (failed tests)} & 0 (0\%) & 0 (0\%) & - & - \\\hline
+	\multicolumn{2}{|c|}{Number of tests with a positive answer} & 990 (99\%) & 990 (99\%) & 990 (99\%) & 990 (99\%) \\\hline
+	\multicolumn{2}{|c|}{Number of tests with answer \texttt{-1}} & 10 (1\%) & 10 (1\%)  & 10 (1\%) & 10 (1\%) \\\hline
+	\multicolumn{2}{|c|}{Number of executions longer than 1 sec} & 0 (0\%) & 0 (0\%) & 3 (0.3\%) & 0 (0\%)\\\hline
 	
 \end{longtable}
 \begin{table}[!h]

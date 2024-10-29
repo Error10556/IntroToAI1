@@ -99,8 +99,8 @@ int main(int argc, char** argv)
         else
             passedtests++;
         string sstats = stats.str();
-        int cur = sstats.find(':');
-        cur = sstats.find(':', cur + 1);
+        int cur = sstats.find("Stats:");
+        cur = sstats.find(':', cur + 6);
         stats.seekg(cur + 1);
         stats >> time;
         cur = sstats.find(':', cur + 1);
