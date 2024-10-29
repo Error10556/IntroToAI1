@@ -2,3 +2,8 @@
 /Back
 *.bin
 
+*.aux
+*.log
+*.pdf
+*.gz
+
