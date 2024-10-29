@@ -17,6 +17,7 @@ enum class CellKind
     Sentinel = 8,  // A sentinel is here
     Keymaker = 16, // The keymaker is here
                    // Ignore the Backdoor key since using it is optional
+    Visited = 32,
 };
 
 // Get the object representation from its mnemonic
@@ -29,19 +30,22 @@ CellKind CellKindFromChar(char ch)
     case 'A':
         return CellKind::Agent;
     case 'B':
-        return CellKind::Empty;
+        return CellKind::Empty; // Ignore the backdoor key
     case 'S':
         return CellKind::Sentinel;
     case 'K':
         return CellKind::Keymaker;
     }
-    return CellKind::Empty; // Ignore the backdoor key
+    return CellKind::Empty;
 }
 
 // Returns true iff Neo can move to the specified cell
 inline bool CellIsSafe(CellKind cell)
 {
-    return (static_cast<int>(cell) & ~(static_cast<int>(CellKind::Keymaker))) ==
+    return (static_cast<int>(cell) & (static_cast<int>(CellKind::Perceived) |
+                                      static_cast<int>(CellKind::Unknown) |
+                                      static_cast<int>(CellKind::Agent) |
+                                      static_cast<int>(CellKind::Sentinel))) ==
            0;
 }
 
@@ -55,6 +59,9 @@ struct Map
 
 private:
     CellKind v[TopX][TopY];
+    // See Map::CanContinuePath
+    bool CanContinuePathHelper(int x, int y, int destx, int desty,
+                               bool vis[][Map::TopY]);
 
 public:
     // Forget everything
@@ -62,9 +69,6 @@ public:
     {
         std::fill_n(&v[0][0], TopX * TopY, CellKind::Unknown);
     }
-    // Find the length of the shortest path from (x1, y1) to (x2, y2) through
-    // safe cells only
-    int ShortestSafePath(int x1, int y1, int x2, int y2);
     Map()
     {
         ResetMap();
@@ -85,63 +89,66 @@ public:
     {
         Set(x, y, CellKind::Empty);
     }
-    // Add the given object(s) to the cell (x, y)
-    void Add(int x, int y, CellKind cell)
+    // Add the given object(s) or flags to the cell (x, y)
+    void SetFlag(int x, int y, CellKind flag)
     {
         if (ValidateCell(x, y))
             v[x][y] = static_cast<CellKind>(static_cast<int>(v[x][y]) |
-                                            static_cast<int>(cell));
+                                            static_cast<int>(flag));
+    }
+    // Remove the objects or flags from the cell (x, y)
+    void UnsetFlag(int x, int y, CellKind flag)
+    {
+        if (ValidateCell(x, y))
+            v[x][y] = static_cast<CellKind>(static_cast<int>(v[x][y]) &
+                                            ~static_cast<int>(flag));
+    }
+    // Check if all the flags are present
+    inline bool Flagged(int x, int y, CellKind flags)
+    {
+        return (static_cast<int>(v[x][y]) & static_cast<int>(flags)) ==
+               static_cast<int>(flags);
     }
     // return the knowledge about cell (x, y)
     inline CellKind Cell(int x, int y)
     {
         return v[x][y];
     }
+    // Heuristic: if the path travelled so far is marked with CellKind::Visited,
+    // can (x, y) be its continuation if we cannot cross our own path?
+    // Returns true if there might be a way to the target from (x, y)
+    bool CanContinuePath(int x, int y, int destx, int desty)
+    {
+        // perform a DFS
+        bool vis[Map::TopX][Map::TopY]{};
+        return CanContinuePathHelper(x, y, destx, desty, vis);
+    }
 };
 
-// Find the length of the shortest path from (x1, y1) to (x2, y2) through safe
-// cells only
-// Uses Breadth First Search
-int Map::ShortestSafePath(int x1, int y1, int x2, int y2)
+// See Map::CanContinuePath
+bool Map::CanContinuePathHelper(int x, int y, int destx, int desty,
+                                bool vis[][Map::TopX])
 {
-    // The distances are initially -1 since they are unknown
-    int dists[TopX][TopY];
-    std::fill_n(&dists[0][0], TopX * TopY, -1);
-    // The starting node has distance 0
-    dists[x1][y1] = 0;
-    int x = x1, y = y1;
-    // The queue of cells to visit
-    std::queue<std::pair<int, int>> q;
-    q.emplace(x1, y1);
-    while (!q.empty())
+    // If we have reached the goal, we return true
+    if (x == destx && y == desty)
+        return true;
+    vis[x][y] = true;
+    for (auto p : Adjacent)
     {
-        // (x, y) is the current cell
-        auto xy = q.front();
-        q.pop();
-        int x = xy.first;
-        int y = xy.second;
-        // The distances to adjacent cells
-        int newdist = dists[x][y] + 1;
-        for (auto& p : Adjacent)
-        {
-            // The adjacent cell is (nx, ny)
-            int nx = x + p.first;
-            int ny = y + p.second;
-            // Immediately return if we found the distance
-            if (nx == x2 && ny == y2)
-                return newdist;
-            // If the adjacent cell exists and is unseen and safe
-            if (ValidateCell(nx, ny) && dists[nx][ny] == -1 &&
-                CellIsSafe(v[nx][ny]))
-            {
-                // expand there
-                dists[nx][ny] = newdist;
-                q.emplace(nx, ny);
-            }
-        }
+        // (nx, ny) is an adjacent cell
+        int nx = x + p.first, ny = y + p.second;
+        // We skip it if it is invalid, unsafe, or has been considered.
+        // However, we allow unknown cells (the real path might be there)
+        if (!ValidateCell(nx, ny) || vis[nx][ny] ||
+            (!CellIsSafe(v[x][y]) && !Flagged(nx, ny, CellKind::Unknown)) ||
+            Flagged(nx, ny, CellKind::Visited))
+            continue;
+        // if there is a possible path in that direction, return true
+        if (CanContinuePathHelper(nx, ny, destx, desty, vis))
+            return true;
     }
-    // Target could not be reached
-    return -1;
+    // We couldn't find anything
+    return false;
 }
 
 std::pair<int, int> Map::Adjacent[] = {
@@ -154,10 +161,12 @@ std::pair<int, int> Map::Adjacent[] = {
 // Handle the input from the interactor
 void ReadSurroundings(Map& mp, int x, int y, int radius)
 {
-    // Reset everything within vision
+    // Reset everything within vision, except Visited flags
     for (int i = -radius; i <= radius; i++)
         for (int j = -radius; j <= radius; j++)
-            mp.ClearCell(x + i, y + j);
+            mp.UnsetFlag(
+                x + i, y + j,
+                static_cast<CellKind>(~static_cast<int>(CellKind::Visited)));
     // And receive the information
     int n;
     std::cin >> n;
@@ -167,7 +176,7 @@ void ReadSurroundings(Map& mp, int x, int y, int radius)
         char type;
         std::cin >> x >> y >> type;
         CellKind kind = CellKindFromChar(type);
-        mp.Add(x, y, kind);
+        mp.SetFlag(x, y, kind);
     }
 }
 
@@ -178,28 +187,55 @@ void MakeMoveAndRead(Map& mp, int newx, int newy, int radius)
     ReadSurroundings(mp, newx, newy, radius);
 }
 
-// This array is used by the Depth-First Search algorithm.
-// visited[x][y] = true iff the cell (x, y) has been visited by Neo
-bool visited[Map::TopX][Map::TopY]{};
+int targetx, targety;
 
-void DFS(Map& mp, int x, int y, int visionRadius)
+int DFS(Map& mp, int x, int y, int visionRadius)
 {
     // We are in (x, y)
-    visited[x][y] = true;
-    for (auto& p : Map::Adjacent)
+    mp.SetFlag(x, y, CellKind::Visited);
+    // Get the set of neighbouring cells
+    std::vector<std::pair<int, int>> adj(
+        Map::Adjacent,
+        Map::Adjacent + sizeof(Map::Adjacent) / sizeof(Map::Adjacent[0]));
+    for (auto& p : adj)
+    {
+        p.first += x;
+        p.second += y;
+    }
+    // HEURISTIC:
+    // order them so that the one closest to the target comes first
+    std::sort(adj.begin(), adj.end(),
+              [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+                  return ManhattanDistance(a.first, a.second, targetx,
+                                           targety) <
+                         ManhattanDistance(b.first, b.second, targetx, targety);
+              });
+    for (auto& p : adj)
     {
         // An adjacent cell is (nx, ny)
-        int nx = x + p.first;
-        int ny = y + p.second;
+        int nx = p.first;
+        int ny = p.second;
+        if (nx == targetx && ny == targety)
+            return 1; // We are one step away from the target
         // Skip if we cannot go to (nx, ny) or we have been there
-        if (!Map::ValidateCell(nx, ny) || !CellIsSafe(mp.Cell(nx, ny)) ||
-            visited[nx][ny])
+        CellKind kind = mp.Cell(nx, ny);
+        if (!Map::ValidateCell(nx, ny) || !CellIsSafe(kind) ||
+            (static_cast<int>(kind) & static_cast<int>(CellKind::Visited)))
+            continue;
+        // HEURISTIC:
+        // We also skip if moving to (nx, ny) guarantees a dead-end
+        if (!mp.CanContinuePath(nx, ny, targetx, targety))
             continue;
         // Move there, explore, and go back
         MakeMoveAndRead(mp, nx, ny, visionRadius);
-        DFS(mp, nx, ny, visionRadius);
+        int res = DFS(mp, nx, ny, visionRadius);
+        if (res != -1) // If we found a path from the next cell to the target
+            return res + 1; // res + 1 is the distance from (x, y) to the target
+        // else go back and try again
         MakeMoveAndRead(mp, x, y, visionRadius);
     }
+    mp.UnsetFlag(x, y, CellKind::Visited);
+    return -1;
 }
 
 int main()
@@ -208,17 +244,13 @@ int main()
     int variant;
     std::cin >> variant;
     // The goal
-    int targetx, targety;
     std::cin >> targetx >> targety;
 
     // Initialize the knowledge map
     Map mp;
     // Initially, receive information about what is seen from (0, 0)
     MakeMoveAndRead(mp, 0, 0, variant);
-    // Explore
-    DFS(mp, 0, 0, variant);
-    // Now we know all safe cells
-    // Output the shortest path's length or -1 if it does not exist
-    std::cout << "e " << mp.ShortestSafePath(0, 0, targetx, targety)
-              << std::endl;
+    // Get a possible answer
+    int res = DFS(mp, 0, 0, variant);
+    std::cout << "e " << res << std::endl;
 }
