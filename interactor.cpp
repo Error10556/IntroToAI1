@@ -11,7 +11,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    if (argc <= 2)
+    if (argc <= 3)
     {
         cout << "Usage: interactor [-io] [-stats] program.bin testfile.txt "
                 "variant"

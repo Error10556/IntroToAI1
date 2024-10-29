@@ -66,24 +66,28 @@ void PrintStats(vector<long long> vals, ostream& stream)
 
 int main(int argc, char** argv)
 {
-    if (argc != 4)
+    if (argc != 5)
     {
-        cout << "Usage: tester program.bin interactor.bin "
+        cout << "Usage: tester program.bin variant interactor.bin "
              << "path/of/tests/directory" << endl;
         return 0;
     }
     string progfile = argv[1];
-    string invokerfile = argv[2];
-    string dir = argv[3];
+    string variant = argv[2];
+    string invokerfile = argv[3];
+    string dir = argv[4];
     long long testcount = 0;
     vector<long long> times, moves;
+    int passedtests = 0;
+    int tlecount = 0;
     for (auto& entry : filesystem::directory_iterator(dir))
     {
         testcount++;
         long long &time = times.emplace_back(),
                   &movecount = moves.emplace_back();
         Process invoker(invokerfile,
-                        {"invoker", "-stats", progfile, entry.path()}, {});
+                        {"invoker", "-stats", progfile, entry.path(), variant},
+                        {});
         stringstream stats;
         FILE* outp = invoker.StdOUT();
         char buf[128];
@@ -91,10 +95,9 @@ int main(int argc, char** argv)
             stats << buf;
         int result = invoker.Wait();
         if (result != 0)
-        {
-            cout << "Failure on " << entry.path() << "! Aborting." << endl;
-            return 0;
-        }
+            cout << "Failure on " << entry.path() << "!" << endl;
+        else
+            passedtests++;
         string sstats = stats.str();
         int cur = sstats.find(':');
         cur = sstats.find(':', cur + 1);
@@ -103,6 +106,11 @@ int main(int argc, char** argv)
         cur = sstats.find(':', cur + 1);
         stats.seekg(cur + 1);
         stats >> movecount;
+        if (time > (int)1e6)
+        {
+            cout << "Time limit exceeded on " << entry.path() << endl;
+            tlecount++;
+        }
         if (testcount % 100 == 0)
             cout << "Tested on " << testcount << " examples." << endl;
     }
@@ -111,4 +119,6 @@ int main(int argc, char** argv)
     PrintStats(times, cout);
     cout << "Number of moves:\n";
     PrintStats(moves, cout);
+    cout << "\nPassed tests: " << passedtests << "/" << testcount << endl;
+    cout << "Time limit exceeded on " << tlecount << "/" << testcount << endl;
 }
