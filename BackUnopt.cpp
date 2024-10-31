@@ -17,6 +17,7 @@ enum class CellKind
     Sentinel = 8,  // A sentinel is here
     Keymaker = 16, // The keymaker is here
                    // Ignore the Backdoor key since using it is optional
+    Visited = 32,
 };
 
 // Get the object representation from its mnemonic
@@ -29,19 +30,22 @@ CellKind CellKindFromChar(char ch)
     case 'A':
         return CellKind::Agent;
     case 'B':
-        return CellKind::Empty;
+        return CellKind::Empty; // Ignore the backdoor key
     case 'S':
         return CellKind::Sentinel;
     case 'K':
         return CellKind::Keymaker;
     }
-    return CellKind::Empty; // Ignore the backdoor key
+    return CellKind::Empty;
 }
 
 // Returns true iff Neo can move to the specified cell
 inline bool CellIsSafe(CellKind cell)
 {
-    return (static_cast<int>(cell) & ~(static_cast<int>(CellKind::Keymaker))) ==
+    return (static_cast<int>(cell) & (static_cast<int>(CellKind::Perceived) |
+                                      static_cast<int>(CellKind::Unknown) |
+                                      static_cast<int>(CellKind::Agent) |
+                                      static_cast<int>(CellKind::Sentinel))) ==
            0;
 }
 
@@ -85,12 +89,25 @@ public:
     {
         Set(x, y, CellKind::Empty);
     }
-    // Add the given object(s) to the cell (x, y)
-    void Add(int x, int y, CellKind cell)
+    // Add the given object(s) or flags to the cell (x, y)
+    void SetFlag(int x, int y, CellKind flag)
     {
         if (ValidateCell(x, y))
             v[x][y] = static_cast<CellKind>(static_cast<int>(v[x][y]) |
-                                            static_cast<int>(cell));
+                                            static_cast<int>(flag));
+    }
+    // Remove the objects or flags from the cell (x, y)
+    void UnsetFlag(int x, int y, CellKind flag)
+    {
+        if (ValidateCell(x, y))
+            v[x][y] = static_cast<CellKind>(static_cast<int>(v[x][y]) &
+                                            ~static_cast<int>(flag));
+    }
+    // Check if all the flags are present
+    inline bool Flagged(int x, int y, CellKind flags)
+    {
+        return (static_cast<int>(v[x][y]) & static_cast<int>(flags)) ==
+               static_cast<int>(flags);
     }
     // return the knowledge about cell (x, y)
     inline CellKind Cell(int x, int y)
@@ -123,7 +140,8 @@ bool Map::CanContinuePathHelper(int x, int y, int destx, int desty,
         // We skip it if it is invalid, unsafe, or has been considered.
         // However, we allow unknown cells (the real path might be there)
         if (!ValidateCell(nx, ny) || vis[nx][ny] ||
-            (!CellIsSafe(v[x][y]) && v[x][y] != CellKind::Unknown))
+            (!CellIsSafe(v[x][y]) && !Flagged(nx, ny, CellKind::Unknown)) ||
+            Flagged(nx, ny, CellKind::Visited))
             continue;
         // if there is a possible path in that direction, return true
         if (CanContinuePathHelper(nx, ny, destx, desty, vis))
@@ -143,10 +161,12 @@ std::pair<int, int> Map::Adjacent[] = {
 // Handle the input from the interactor
 void ReadSurroundings(Map& mp, int x, int y, int radius)
 {
-    // Reset everything within vision
+    // Reset everything within vision, except Visited flags
     for (int i = -radius; i <= radius; i++)
         for (int j = -radius; j <= radius; j++)
-            mp.ClearCell(x + i, y + j);
+            mp.UnsetFlag(
+                x + i, y + j,
+                static_cast<CellKind>(~static_cast<int>(CellKind::Visited)));
     // And receive the information
     int n;
     std::cin >> n;
@@ -156,7 +176,7 @@ void ReadSurroundings(Map& mp, int x, int y, int radius)
         char type;
         std::cin >> x >> y >> type;
         CellKind kind = CellKindFromChar(type);
-        mp.Add(x, y, kind);
+        mp.SetFlag(x, y, kind);
     }
 }
 
@@ -167,19 +187,12 @@ void MakeMoveAndRead(Map& mp, int newx, int newy, int radius)
     ReadSurroundings(mp, newx, newy, radius);
 }
 
-// This array is used by the Depth-First Search algorithm.
-// dists[x][y] = the minimal distance from origin to point (x, y) so far
-int dists[Map::TopX][Map::TopY];
-
 int targetx, targety;
 
-void DFS(Map& mp, int x, int y, int dist, int visionRadius, int& answer)
+int DFS(Map& mp, int x, int y, int visionRadius)
 {
-    // HEURISTIC: we can stop evaluating if we will not reach a better answer
-    if (dist >= answer)
-        return;
     // We are in (x, y)
-    dists[x][y] = dist;
+    mp.SetFlag(x, y, CellKind::Visited);
     // Get the set of neighbouring cells
     std::vector<std::pair<int, int>> adj(
         Map::Adjacent,
@@ -203,14 +216,11 @@ void DFS(Map& mp, int x, int y, int dist, int visionRadius, int& answer)
         int nx = p.first;
         int ny = p.second;
         if (nx == targetx && ny == targety)
-        {
-            answer = std::min(answer, dist + 1); // We are one step away from the target
-            return;
-        }
-        // Skip if we cannot go to (nx, ny) or there was a better (shorter)
-        // way to get to (nx, ny)
-        if (!Map::ValidateCell(nx, ny) || !CellIsSafe(mp.Cell(nx, ny)) ||
-            (dists[nx][ny] < dist + 1 && dists[nx][ny] != -1))
+            return 1; // We are one step away from the target
+        // Skip if we cannot go to (nx, ny) or we have been there
+        CellKind kind = mp.Cell(nx, ny);
+        if (!Map::ValidateCell(nx, ny) || !CellIsSafe(kind) ||
+            (static_cast<int>(kind) & static_cast<int>(CellKind::Visited)))
             continue;
         // HEURISTIC:
         // We also skip if moving to (nx, ny) guarantees a dead-end
@@ -218,9 +228,14 @@ void DFS(Map& mp, int x, int y, int dist, int visionRadius, int& answer)
             continue;
         // Move there, explore, and go back
         MakeMoveAndRead(mp, nx, ny, visionRadius);
-        DFS(mp, nx, ny, dist + 1, visionRadius, answer);
+        int res = DFS(mp, nx, ny, visionRadius);
+        if (res != -1) // If we found a path from the next cell to the target
+            return res + 1; // res + 1 is the distance from (x, y) to the target
+        // else go back and try again
         MakeMoveAndRead(mp, x, y, visionRadius);
     }
+    mp.UnsetFlag(x, y, CellKind::Visited);
+    return -1;
 }
 
 int main()
@@ -233,12 +248,9 @@ int main()
 
     // Initialize the knowledge map
     Map mp;
-    std::fill_n(&dists[0][0], Map::TopX * Map::TopY, -1);
     // Initially, receive information about what is seen from (0, 0)
     MakeMoveAndRead(mp, 0, 0, variant);
-    int res = 40; // HEURISTIC: the answer can never be greater than approx. 39
-    DFS(mp, 0, 0, 0, variant, res);
-    if (res == 40)
-        res = -1;  // Output -1 if not found
+    // Get a possible answer
+    int res = DFS(mp, 0, 0, variant);
     std::cout << "e " << res << std::endl;
 }
