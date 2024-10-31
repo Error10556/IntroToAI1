@@ -204,7 +204,8 @@ void DFS(Map& mp, int x, int y, int dist, int visionRadius, int& answer)
         int ny = p.second;
         if (nx == targetx && ny == targety)
         {
-            answer = std::min(answer, dist + 1); // We are one step away from the target
+            answer = std::min(answer,
+                              dist + 1); // We are one step away from the target
             return;
         }
         // Skip if we cannot go to (nx, ny) or there was a better (shorter)
@@ -219,6 +220,10 @@ void DFS(Map& mp, int x, int y, int dist, int visionRadius, int& answer)
         // Move there, explore, and go back
         MakeMoveAndRead(mp, nx, ny, visionRadius);
         DFS(mp, nx, ny, dist + 1, visionRadius, answer);
+        // HEURISTIC:
+        // targetx + targety is the absolute minimum distance, cannot improve it
+        if (answer == ManhattanDistance(0, 0, targetx, targety))
+            return;
         MakeMoveAndRead(mp, x, y, visionRadius);
     }
 }
@@ -239,6 +244,6 @@ int main()
     int res = 40; // HEURISTIC: the answer can never be greater than approx. 39
     DFS(mp, 0, 0, 0, variant, res);
     if (res == 40)
-        res = -1;  // Output -1 if not found
+        res = -1; // Output -1 if not found
     std::cout << "e " << res << std::endl;
 }
