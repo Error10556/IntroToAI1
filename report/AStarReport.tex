@@ -75,15 +75,15 @@ A total of $1000$ tests were generated, out of which exactly 10 have no path to 
 \end{figure}
 
 \subsection{Algorithm comparison}
-In the table below, a ``win'' is defined as a situation where Neo can reach the Keymaker and the program can correctly determine the shortest distance to the goal.
+In Table \ref{comparison}, a ``win'' is defined as a situation where Neo can reach the Keymaker and the program can correctly determine the shortest distance to the goal.
+
+\pagebreak
 
 \begin{longtable}[c]{|c|c|c|c|c|c|}
 	\hline
 	\multicolumn{2}{|c|}{} & \textbf{A* (variant 1)} & \textbf{A* (variant 2)} & \textbf{Backtracking (v. 1)} & \textbf{Backtracking (v. 2)}\\
 	\hline
 	\endhead
-	\multicolumn{6}{|c|}{...}\\ \endfoot
-	\endlastfoot
 	\multirow{4}{3cm}{Execution time, $\mu s$} & Mean & 1243.06 & 1259.61 & 28100.18 & 30429.94 \\\cline{2-6}
 	& Mode & 1280 (7 times) & 1088 (6 times) & 1165 (3 times) & 1079 (2 times) \\\cline{2-6}
 	& Median & 1201 & 1214.5 & 5561.5 & 5998 \\\cline{2-6}
@@ -94,9 +94,12 @@ In the table below, a ``win'' is defined as a situation where Neo can reach the 
 	& SD & 10.73 & 10.73 & 5022.03 & 5022.03 \\\hline
 	\multicolumn{2}{|c|}{Number of wins} & 990 (99\%) & 990 (99\%) & 990 (99\%) & 990 (99\%) \\\hline
 	\multicolumn{2}{|c|}{Number of losses} & 10 (1\%) & 10 (1\%)  & 10 (1\%) & 10 (1\%) \\\hline
-	\multicolumn{2}{|c|}{Number of executions longer than 1 sec} & 0 (0\%) & 0 (0\%) & 1 (0.1\%) & 1 (0.1\%)\\\hline
+	\multicolumn{2}{|c|}{Executions longer than 1 sec} & 0 (0\%) & 0 (0\%) & 1 (0.1\%) & 1 (0.1\%)\\\hline
 	
 \end{longtable}
+
+\setcounter{table}{0}
+
 \begin{table}[!h]
 	\caption{Statistics of algorithms side-by-side.} \label{comparison}
 \end{table}
