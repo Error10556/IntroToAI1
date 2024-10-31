@@ -55,10 +55,9 @@ Neo chooses a safe cell $c$ that is adjacent to a previously visited cell, among
 We ignore the Backdoor key, as it ``is not an obligation" ``to utilize its advantages".
 
 \subsection{Backtracking}
-In this algorithm, each known cell might be: (a) visited or unvisited, (b) safe or unsafe.
+In this algorithm, each cell is associated with the shortest distance from the start to this cell. An unexplored cell is marked with distance \texttt{-1}.
 
-Neo explores the safe and reachable portion of the map using Depth-First Search (DFS). DFS marks cells as visited upon reaching them and does not explore already visited cells. When there are no adjacent unvisited cells, Neo backtracks.
-After the execution of DFS, we use a Breadth-First Search on the explored part of the map to find the shortest distance to the Keymaker. If the Keymaker is not in the reachable portion, we output \texttt{-1}.
+Neo explores the safe and reachable portion of the map using Depth-First Search (DFS). DFS assigns distances to cells upon reaching them and does not explore already visited cells that have been previously reached with fewer moves. Moreover, the Actor does not make a move if it guarantees a dead-end, or the number of moves is already exceeding the best known answer, or the theoretical best answer has already been found. When there are no adjacent suitable cells, Neo backtracks.
 
 Again, we ignore the Backdoor key.
 
@@ -67,479 +66,7 @@ Again, we ignore the Backdoor key.
 A total of $1000$ tests were generated, out of which exactly 10 have no path to the Keymaker (if we ignore the Backdoor key).
 
 \begin{center}
-
-\begin{tikzpicture}[scale=0.35,baseline=0]\node[above] at (4.5,0) {test5};
-	\node at (0.5,-0.5) {N};
-	\fill[pink] (0,-1) rectangle (1,-2);
-	\fill[pink] (0,-3) rectangle (1,-4);
-	\node at (0.5,-4.5) {S};
-	\fill[pink] (0,-5) rectangle (1,-6);
-	\fill[pink] (1,0) rectangle (2,-1);
-	\node at (1.5,-1.5) {S};
-	\fill[pink] (1,-2) rectangle (2,-3);
-	\fill[pink] (1,-4) rectangle (2,-5);
-	\fill[pink] (1,-5) rectangle (2,-6);
-	\fill[pink] (1,-6) rectangle (2,-7);
-	\fill[pink] (1,-7) rectangle (2,-8);
-	\fill[pink] (2,-1) rectangle (3,-2);
-	\node at (2.5,-2.5) {S};
-	\fill[pink] (2,-3) rectangle (3,-4);
-	\fill[pink] (2,-5) rectangle (3,-6);
-	\node at (2.5,-6.5) {A};
-	\fill[pink] (2,-7) rectangle (3,-8);
-	\fill[pink] (3,-2) rectangle (4,-3);
-	\fill[pink] (3,-5) rectangle (4,-6);
-	\fill[pink] (3,-6) rectangle (4,-7);
-	\fill[pink] (3,-7) rectangle (4,-8);
-	\fill[pink] (4,0) rectangle (5,-1);
-	\fill[pink] (4,-1) rectangle (5,-2);
-	\node at (4.5,-5.5) {K};
-	\fill[pink] (4,-8) rectangle (5,-9);
-	\node at (5.5,-0.5) {A};
-	\fill[pink] (5,-1) rectangle (6,-2);
-	\fill[pink] (5,-7) rectangle (6,-8);
-	\node at (5.5,-8.5) {S};
-	\fill[pink] (6,0) rectangle (7,-1);
-	\fill[pink] (6,-1) rectangle (7,-2);
-	\fill[pink] (6,-8) rectangle (7,-9);
-	\node at (8.5,-5.5) {B};
-	\draw[very thick, step=1.0] (0,0) grid (9,-9);
-\end{tikzpicture}
-\begin{tikzpicture}[scale=0.35,baseline=0]\node[above] at (4.5,0) {test10};
-	\node at (0.5,-0.5) {N};
-	\fill[pink] (0,-7) rectangle (1,-8);
-	\node at (0.5,-8.5) {A};
-	\fill[pink] (1,-7) rectangle (2,-8);
-	\fill[pink] (1,-8) rectangle (2,-9);
-	\fill[pink] (4,0) rectangle (5,-1);
-	\fill[pink] (4,-1) rectangle (5,-2);
-	\fill[pink] (4,-2) rectangle (5,-3);
-	\fill[pink] (4,-3) rectangle (5,-4);
-	\fill[pink] (4,-4) rectangle (5,-5);
-	\fill[pink] (4,-8) rectangle (5,-9);
-	\fill[pink] (5,0) rectangle (6,-1);
-	\fill[pink] (5,-1) rectangle (6,-2);
-	\node at (5.5,-1.5) {A};
-	\fill[pink] (5,-2) rectangle (6,-3);
-	\node at (5.5,-2.5) {S};
-	\fill[pink] (5,-3) rectangle (6,-4);
-	\node at (5.5,-3.5) {A};
-	\fill[pink] (5,-4) rectangle (6,-5);
-	\fill[pink] (5,-5) rectangle (6,-6);
-	\fill[pink] (5,-6) rectangle (6,-7);
-	\fill[pink] (5,-7) rectangle (6,-8);
-	\node at (5.5,-8.5) {S};
-	\fill[pink] (6,0) rectangle (7,-1);
-	\node at (6.5,-0.5) {A};
-	\fill[pink] (6,-1) rectangle (7,-2);
-	\fill[pink] (6,-2) rectangle (7,-3);
-	\fill[pink] (6,-3) rectangle (7,-4);
-	\fill[pink] (6,-4) rectangle (7,-5);
-	\node at (6.5,-4.5) {S};
-	\fill[pink] (6,-5) rectangle (7,-6);
-	\node at (6.5,-5.5) {A};
-	\fill[pink] (6,-6) rectangle (7,-7);
-	\fill[pink] (6,-8) rectangle (7,-9);
-	\fill[pink] (7,0) rectangle (8,-1);
-	\fill[pink] (7,-1) rectangle (8,-2);
-	\node at (7.5,-3.5) {K};
-	\fill[pink] (7,-4) rectangle (8,-5);
-	\fill[pink] (7,-5) rectangle (8,-6);
-	\fill[pink] (7,-6) rectangle (8,-7);
-	\node at (8.5,-7.5) {B};
-	\draw[very thick, step=1.0] (0,0) grid (9,-9);
-\end{tikzpicture}
-\begin{tikzpicture}[scale=0.35,baseline=0]\node[above] at (4.5,0) {test13};
-	\node at (0.5,-0.5) {N};
-	\fill[pink] (0,-2) rectangle (1,-3);
-	\fill[pink] (1,-1) rectangle (2,-2);
-	\node at (1.5,-2.5) {S};
-	\fill[pink] (1,-3) rectangle (2,-4);
-	\fill[pink] (2,-1) rectangle (3,-2);
-	\fill[pink] (2,-2) rectangle (3,-3);
-	\fill[pink] (2,-3) rectangle (3,-4);
-	\node at (2.5,-4.5) {K};
-	\fill[pink] (2,-6) rectangle (3,-7);
-	\fill[pink] (2,-7) rectangle (3,-8);
-	\fill[pink] (2,-8) rectangle (3,-9);
-	\fill[pink] (3,-1) rectangle (4,-2);
-	\fill[pink] (3,-2) rectangle (4,-3);
-	\node at (3.5,-2.5) {A};
-	\fill[pink] (3,-3) rectangle (4,-4);
-	\fill[pink] (3,-4) rectangle (4,-5);
-	\fill[pink] (3,-6) rectangle (4,-7);
-	\node at (3.5,-7.5) {A};
-	\fill[pink] (3,-8) rectangle (4,-9);
-	\fill[pink] (4,-1) rectangle (5,-2);
-	\fill[pink] (4,-2) rectangle (5,-3);
-	\fill[pink] (4,-3) rectangle (5,-4);
-	\node at (4.5,-3.5) {A};
-	\fill[pink] (4,-4) rectangle (5,-5);
-	\fill[pink] (4,-6) rectangle (5,-7);
-	\fill[pink] (4,-7) rectangle (5,-8);
-	\fill[pink] (4,-8) rectangle (5,-9);
-	\fill[pink] (5,0) rectangle (6,-1);
-	\fill[pink] (5,-1) rectangle (6,-2);
-	\fill[pink] (5,-2) rectangle (6,-3);
-	\fill[pink] (5,-3) rectangle (6,-4);
-	\fill[pink] (5,-4) rectangle (6,-5);
-	\node at (5.5,-8.5) {B};
-	\fill[pink] (6,0) rectangle (7,-1);
-	\node at (6.5,-0.5) {A};
-	\fill[pink] (6,-1) rectangle (7,-2);
-	\fill[pink] (6,-2) rectangle (7,-3);
-	\node at (6.5,-3.5) {A};
-	\fill[pink] (6,-4) rectangle (7,-5);
-	\fill[pink] (6,-6) rectangle (7,-7);
-	\fill[pink] (6,-7) rectangle (7,-8);
-	\fill[pink] (6,-8) rectangle (7,-9);
-	\fill[pink] (7,0) rectangle (8,-1);
-	\fill[pink] (7,-1) rectangle (8,-2);
-	\node at (7.5,-1.5) {A};
-	\fill[pink] (7,-2) rectangle (8,-3);
-	\fill[pink] (7,-3) rectangle (8,-4);
-	\fill[pink] (7,-4) rectangle (8,-5);
-	\fill[pink] (7,-6) rectangle (8,-7);
-	\node at (7.5,-7.5) {A};
-	\fill[pink] (7,-8) rectangle (8,-9);
-	\fill[pink] (8,0) rectangle (9,-1);
-	\fill[pink] (8,-1) rectangle (9,-2);
-	\fill[pink] (8,-2) rectangle (9,-3);
-	\fill[pink] (8,-3) rectangle (9,-4);
-	\node at (8.5,-4.5) {S};
-	\fill[pink] (8,-5) rectangle (9,-6);
-	\fill[pink] (8,-6) rectangle (9,-7);
-	\node at (8.5,-6.5) {S};
-	\fill[pink] (8,-7) rectangle (9,-8);
-	\fill[pink] (8,-8) rectangle (9,-9);
-	\draw[very thick, step=1.0] (0,0) grid (9,-9);
-\end{tikzpicture}
-\begin{tikzpicture}[scale=0.35,baseline=0]\node[above] at (4.5,0) {test19};
-	\node at (0.5,-0.5) {N};
-	\fill[pink] (0,-4) rectangle (1,-5);
-	\fill[pink] (0,-5) rectangle (1,-6);
-	\fill[pink] (0,-6) rectangle (1,-7);
-	\node at (1.5,-1.5) {B};
-	\fill[pink] (1,-4) rectangle (2,-5);
-	\node at (1.5,-5.5) {A};
-	\fill[pink] (1,-6) rectangle (2,-7);
-	\fill[pink] (2,-4) rectangle (3,-5);
-	\fill[pink] (2,-5) rectangle (3,-6);
-	\fill[pink] (2,-6) rectangle (3,-7);
-	\fill[pink] (2,-7) rectangle (3,-8);
-	\fill[pink] (2,-8) rectangle (3,-9);
-	\fill[pink] (3,-5) rectangle (4,-6);
-	\fill[pink] (3,-6) rectangle (4,-7);
-	\node at (3.5,-7.5) {A};
-	\fill[pink] (3,-8) rectangle (4,-9);
-	\fill[pink] (4,-1) rectangle (5,-2);
-	\fill[pink] (4,-2) rectangle (5,-3);
-	\fill[pink] (4,-3) rectangle (5,-4);
-	\fill[pink] (4,-4) rectangle (5,-5);
-	\node at (4.5,-5.5) {S};
-	\fill[pink] (4,-6) rectangle (5,-7);
-	\fill[pink] (4,-7) rectangle (5,-8);
-	\fill[pink] (4,-8) rectangle (5,-9);
-	\fill[pink] (5,-1) rectangle (6,-2);
-	\node at (5.5,-2.5) {A};
-	\fill[pink] (5,-3) rectangle (6,-4);
-	\fill[pink] (5,-5) rectangle (6,-6);
-	\fill[pink] (6,-1) rectangle (7,-2);
-	\fill[pink] (6,-2) rectangle (7,-3);
-	\fill[pink] (6,-3) rectangle (7,-4);
-	\node at (6.5,-5.5) {K};
-	\fill[pink] (6,-6) rectangle (7,-7);
-	\fill[pink] (6,-7) rectangle (7,-8);
-	\fill[pink] (6,-8) rectangle (7,-9);
-	\fill[pink] (7,-1) rectangle (8,-2);
-	\fill[pink] (7,-2) rectangle (8,-3);
-	\fill[pink] (7,-3) rectangle (8,-4);
-	\fill[pink] (7,-6) rectangle (8,-7);
-	\node at (7.5,-7.5) {A};
-	\fill[pink] (7,-8) rectangle (8,-9);
-	\fill[pink] (8,-1) rectangle (9,-2);
-	\node at (8.5,-2.5) {A};
-	\fill[pink] (8,-3) rectangle (9,-4);
-	\fill[pink] (8,-6) rectangle (9,-7);
-	\fill[pink] (8,-7) rectangle (9,-8);
-	\fill[pink] (8,-8) rectangle (9,-9);
-	\draw[very thick, step=1.0] (0,0) grid (9,-9);
-\end{tikzpicture}
-\begin{tikzpicture}[scale=0.35,baseline=0]\node[above] at (4.5,0) {test24};
-	\node at (0.5,-0.5) {N};
-	\fill[pink] (0,-4) rectangle (1,-5);
-	\node at (0.5,-5.5) {A};
-	\fill[pink] (0,-6) rectangle (1,-7);
-	\node at (0.5,-7.5) {A};
-	\fill[pink] (0,-8) rectangle (1,-9);
-	\fill[pink] (1,0) rectangle (2,-1);
-	\fill[pink] (1,-1) rectangle (2,-2);
-	\fill[pink] (1,-2) rectangle (2,-3);
-	\fill[pink] (1,-3) rectangle (2,-4);
-	\fill[pink] (1,-4) rectangle (2,-5);
-	\node at (1.5,-4.5) {S};
-	\fill[pink] (1,-5) rectangle (2,-6);
-	\fill[pink] (1,-6) rectangle (2,-7);
-	\fill[pink] (1,-7) rectangle (2,-8);
-	\fill[pink] (1,-8) rectangle (2,-9);
-	\fill[pink] (2,0) rectangle (3,-1);
-	\node at (2.5,-1.5) {A};
-	\fill[pink] (2,-2) rectangle (3,-3);
-	\node at (2.5,-3.5) {B};
-	\fill[pink] (2,-4) rectangle (3,-5);
-	\node at (2.5,-5.5) {A};
-	\fill[pink] (2,-6) rectangle (3,-7);
-	\fill[pink] (2,-7) rectangle (3,-8);
-	\node at (2.5,-8.5) {S};
-	\fill[pink] (3,0) rectangle (4,-1);
-	\fill[pink] (3,-1) rectangle (4,-2);
-	\fill[pink] (3,-2) rectangle (4,-3);
-	\fill[pink] (3,-4) rectangle (4,-5);
-	\fill[pink] (3,-5) rectangle (4,-6);
-	\fill[pink] (3,-6) rectangle (4,-7);
-	\fill[pink] (3,-8) rectangle (4,-9);
-	\fill[pink] (5,-2) rectangle (6,-3);
-	\fill[pink] (5,-3) rectangle (6,-4);
-	\fill[pink] (5,-4) rectangle (6,-5);
-	\fill[pink] (6,-2) rectangle (7,-3);
-	\node at (6.5,-3.5) {A};
-	\fill[pink] (6,-4) rectangle (7,-5);
-	\fill[pink] (7,-2) rectangle (8,-3);
-	\fill[pink] (7,-3) rectangle (8,-4);
-	\fill[pink] (7,-4) rectangle (8,-5);
-	\fill[pink] (7,-5) rectangle (8,-6);
-	\fill[pink] (7,-6) rectangle (8,-7);
-	\node at (8.5,-3.5) {K};
-	\fill[pink] (8,-4) rectangle (9,-5);
-	\node at (8.5,-5.5) {A};
-	\fill[pink] (8,-6) rectangle (9,-7);
-	\draw[very thick, step=1.0] (0,0) grid (9,-9);
-\end{tikzpicture}
-\begin{tikzpicture}[scale=0.35,baseline=0]\node[above] at (4.5,0) {test26};
-	\node at (0.5,-0.5) {N};
-	\fill[pink] (0,-1) rectangle (1,-2);
-	\fill[pink] (1,0) rectangle (2,-1);
-	\node at (1.5,-1.5) {S};
-	\fill[pink] (1,-2) rectangle (2,-3);
-	\fill[pink] (2,-1) rectangle (3,-2);
-	\fill[pink] (2,-5) rectangle (3,-6);
-	\fill[pink] (2,-6) rectangle (3,-7);
-	\fill[pink] (2,-7) rectangle (3,-8);
-	\fill[pink] (3,-5) rectangle (4,-6);
-	\fill[pink] (3,-6) rectangle (4,-7);
-	\node at (3.5,-6.5) {A};
-	\fill[pink] (3,-7) rectangle (4,-8);
-	\fill[pink] (3,-8) rectangle (4,-9);
-	\fill[pink] (4,-5) rectangle (5,-6);
-	\fill[pink] (4,-6) rectangle (5,-7);
-	\fill[pink] (4,-7) rectangle (5,-8);
-	\node at (4.5,-7.5) {A};
-	\fill[pink] (4,-8) rectangle (5,-9);
-	\node at (5.5,-2.5) {B};
-	\fill[pink] (5,-6) rectangle (6,-7);
-	\fill[pink] (5,-7) rectangle (6,-8);
-	\fill[pink] (5,-8) rectangle (6,-9);
-	\node at (7.5,-4.5) {K};
-	\draw[very thick, step=1.0] (0,0) grid (9,-9);
-\end{tikzpicture}
-\begin{tikzpicture}[scale=0.35,baseline=0]\node[above] at (4.5,0) {test32};
-	\node at (0.5,-0.5) {N};
-	\fill[pink] (1,-3) rectangle (2,-4);
-	\fill[pink] (1,-4) rectangle (2,-5);
-	\fill[pink] (1,-5) rectangle (2,-6);
-	\fill[pink] (1,-6) rectangle (2,-7);
-	\fill[pink] (1,-7) rectangle (2,-8);
-	\fill[pink] (2,-3) rectangle (3,-4);
-	\fill[pink] (2,-4) rectangle (3,-5);
-	\node at (2.5,-4.5) {A};
-	\fill[pink] (2,-5) rectangle (3,-6);
-	\node at (2.5,-5.5) {A};
-	\fill[pink] (2,-6) rectangle (3,-7);
-	\node at (2.5,-7.5) {S};
-	\fill[pink] (2,-8) rectangle (3,-9);
-	\node at (3.5,-2.5) {B};
-	\fill[pink] (3,-3) rectangle (4,-4);
-	\fill[pink] (3,-4) rectangle (4,-5);
-	\fill[pink] (3,-5) rectangle (4,-6);
-	\fill[pink] (3,-6) rectangle (4,-7);
-	\fill[pink] (3,-7) rectangle (4,-8);
-	\fill[pink] (4,-1) rectangle (5,-2);
-	\fill[pink] (4,-2) rectangle (5,-3);
-	\fill[pink] (4,-3) rectangle (5,-4);
-	\fill[pink] (4,-6) rectangle (5,-7);
-	\fill[pink] (4,-7) rectangle (5,-8);
-	\fill[pink] (4,-8) rectangle (5,-9);
-	\fill[pink] (5,0) rectangle (6,-1);
-	\fill[pink] (5,-1) rectangle (6,-2);
-	\fill[pink] (5,-2) rectangle (6,-3);
-	\node at (5.5,-2.5) {A};
-	\fill[pink] (5,-3) rectangle (6,-4);
-	\fill[pink] (5,-6) rectangle (6,-7);
-	\node at (5.5,-7.5) {A};
-	\fill[pink] (5,-8) rectangle (6,-9);
-	\fill[pink] (6,0) rectangle (7,-1);
-	\fill[pink] (6,-1) rectangle (7,-2);
-	\node at (6.5,-1.5) {A};
-	\fill[pink] (6,-2) rectangle (7,-3);
-	\fill[pink] (6,-3) rectangle (7,-4);
-	\fill[pink] (6,-6) rectangle (7,-7);
-	\fill[pink] (6,-7) rectangle (7,-8);
-	\fill[pink] (6,-8) rectangle (7,-9);
-	\fill[pink] (7,0) rectangle (8,-1);
-	\fill[pink] (7,-1) rectangle (8,-2);
-	\fill[pink] (7,-2) rectangle (8,-3);
-	\fill[pink] (7,-3) rectangle (8,-4);
-	\node at (7.5,-5.5) {K};
-	\fill[pink] (8,-2) rectangle (9,-3);
-	\node at (8.5,-3.5) {S};
-	\fill[pink] (8,-4) rectangle (9,-5);
-	\draw[very thick, step=1.0] (0,0) grid (9,-9);
-\end{tikzpicture}
-\begin{tikzpicture}[scale=0.35,baseline=0]\node[above] at (4.5,0) {test34};
-	\node at (0.5,-0.5) {N};
-	\fill[pink] (0,-2) rectangle (1,-3);
-	\fill[pink] (0,-3) rectangle (1,-4);
-	\fill[pink] (0,-4) rectangle (1,-5);
-	\fill[pink] (1,0) rectangle (2,-1);
-	\fill[pink] (1,-1) rectangle (2,-2);
-	\fill[pink] (1,-2) rectangle (2,-3);
-	\node at (1.5,-3.5) {A};
-	\fill[pink] (1,-4) rectangle (2,-5);
-	\fill[pink] (2,0) rectangle (3,-1);
-	\node at (2.5,-1.5) {A};
-	\fill[pink] (2,-2) rectangle (3,-3);
-	\fill[pink] (2,-3) rectangle (3,-4);
-	\fill[pink] (2,-4) rectangle (3,-5);
-	\fill[pink] (2,-5) rectangle (3,-6);
-	\fill[pink] (2,-6) rectangle (3,-7);
-	\fill[pink] (3,0) rectangle (4,-1);
-	\fill[pink] (3,-1) rectangle (4,-2);
-	\fill[pink] (3,-2) rectangle (4,-3);
-	\fill[pink] (3,-4) rectangle (4,-5);
-	\node at (3.5,-5.5) {A};
-	\fill[pink] (3,-6) rectangle (4,-7);
-	\fill[pink] (4,-1) rectangle (5,-2);
-	\fill[pink] (4,-2) rectangle (5,-3);
-	\fill[pink] (4,-3) rectangle (5,-4);
-	\fill[pink] (4,-4) rectangle (5,-5);
-	\fill[pink] (4,-5) rectangle (5,-6);
-	\fill[pink] (4,-6) rectangle (5,-7);
-	\fill[pink] (5,-1) rectangle (6,-2);
-	\node at (5.5,-2.5) {A};
-	\fill[pink] (5,-3) rectangle (6,-4);
-	\fill[pink] (6,-1) rectangle (7,-2);
-	\fill[pink] (6,-2) rectangle (7,-3);
-	\fill[pink] (6,-3) rectangle (7,-4);
-	\fill[pink] (6,-4) rectangle (7,-5);
-	\fill[pink] (7,-2) rectangle (8,-3);
-	\node at (7.5,-3.5) {A};
-	\fill[pink] (7,-4) rectangle (8,-5);
-	\node at (7.5,-7.5) {K};
-	\node at (8.5,-1.5) {B};
-	\fill[pink] (8,-2) rectangle (9,-3);
-	\fill[pink] (8,-3) rectangle (9,-4);
-	\fill[pink] (8,-4) rectangle (9,-5);
-	\draw[very thick, step=1.0] (0,0) grid (9,-9);
-\end{tikzpicture}
-\begin{tikzpicture}[scale=0.35,baseline=0]\node[above] at (4.5,0) {test39};
-	\node at (0.5,-0.5) {N};
-	\fill[pink] (0,-2) rectangle (1,-3);
-	\fill[pink] (0,-3) rectangle (1,-4);
-	\fill[pink] (0,-4) rectangle (1,-5);
-	\fill[pink] (1,-2) rectangle (2,-3);
-	\node at (1.5,-3.5) {A};
-	\fill[pink] (1,-4) rectangle (2,-5);
-	\fill[pink] (1,-5) rectangle (2,-6);
-	\fill[pink] (1,-6) rectangle (2,-7);
-	\fill[pink] (2,-2) rectangle (3,-3);
-	\fill[pink] (2,-3) rectangle (3,-4);
-	\fill[pink] (2,-4) rectangle (3,-5);
-	\node at (2.5,-5.5) {A};
-	\fill[pink] (2,-6) rectangle (3,-7);
-	\node at (2.5,-7.5) {K};
-	\fill[pink] (3,-4) rectangle (4,-5);
-	\fill[pink] (3,-5) rectangle (4,-6);
-	\fill[pink] (3,-6) rectangle (4,-7);
-	\fill[pink] (4,-7) rectangle (5,-8);
-	\node at (5.5,-5.5) {B};
-	\fill[pink] (5,-6) rectangle (6,-7);
-	\node at (5.5,-7.5) {S};
-	\fill[pink] (5,-8) rectangle (6,-9);
-	\fill[pink] (6,-7) rectangle (7,-8);
-	\node at (6.5,-8.5) {S};
-	\fill[pink] (7,0) rectangle (8,-1);
-	\fill[pink] (7,-1) rectangle (8,-2);
-	\fill[pink] (7,-2) rectangle (8,-3);
-	\fill[pink] (7,-8) rectangle (8,-9);
-	\fill[pink] (8,0) rectangle (9,-1);
-	\node at (8.5,-1.5) {A};
-	\fill[pink] (8,-2) rectangle (9,-3);
-	\draw[very thick, step=1.0] (0,0) grid (9,-9);
-\end{tikzpicture}
-\begin{tikzpicture}[scale=0.35,baseline=0]\node[above] at (4.5,0) {test40};
-	\node at (0.5,-0.5) {N};
-	\fill[pink] (0,-6) rectangle (1,-7);
-	\fill[pink] (0,-7) rectangle (1,-8);
-	\fill[pink] (0,-8) rectangle (1,-9);
-	\fill[pink] (1,-6) rectangle (2,-7);
-	\fill[pink] (1,-7) rectangle (2,-8);
-	\node at (1.5,-7.5) {A};
-	\fill[pink] (1,-8) rectangle (2,-9);
-	\fill[pink] (2,0) rectangle (3,-1);
-	\fill[pink] (2,-1) rectangle (3,-2);
-	\fill[pink] (2,-2) rectangle (3,-3);
-	\fill[pink] (2,-5) rectangle (3,-6);
-	\fill[pink] (2,-6) rectangle (3,-7);
-	\node at (2.5,-6.5) {S};
-	\fill[pink] (2,-7) rectangle (3,-8);
-	\node at (2.5,-7.5) {A};
-	\fill[pink] (2,-8) rectangle (3,-9);
-	\fill[pink] (3,0) rectangle (4,-1);
-	\fill[pink] (3,-1) rectangle (4,-2);
-	\node at (3.5,-1.5) {A};
-	\fill[pink] (3,-2) rectangle (4,-3);
-	\fill[pink] (3,-3) rectangle (4,-4);
-	\fill[pink] (3,-4) rectangle (4,-5);
-	\node at (3.5,-5.5) {K};
-	\fill[pink] (3,-6) rectangle (4,-7);
-	\fill[pink] (3,-7) rectangle (4,-8);
-	\fill[pink] (3,-8) rectangle (4,-9);
-	\fill[pink] (4,0) rectangle (5,-1);
-	\fill[pink] (4,-1) rectangle (5,-2);
-	\fill[pink] (4,-2) rectangle (5,-3);
-	\node at (4.5,-2.5) {A};
-	\fill[pink] (4,-3) rectangle (5,-4);
-	\node at (4.5,-3.5) {A};
-	\fill[pink] (4,-4) rectangle (5,-5);
-	\fill[pink] (5,-1) rectangle (6,-2);
-	\fill[pink] (5,-2) rectangle (6,-3);
-	\fill[pink] (5,-3) rectangle (6,-4);
-	\fill[pink] (5,-4) rectangle (6,-5);
-	\fill[pink] (6,-1) rectangle (7,-2);
-	\fill[pink] (6,-2) rectangle (7,-3);
-	\node at (6.5,-2.5) {A};
-	\fill[pink] (6,-3) rectangle (7,-4);
-	\node at (6.5,-3.5) {S};
-	\fill[pink] (6,-4) rectangle (7,-5);
-	\fill[pink] (6,-5) rectangle (7,-6);
-	\fill[pink] (6,-6) rectangle (7,-7);
-	\fill[pink] (6,-7) rectangle (7,-8);
-	\fill[pink] (6,-8) rectangle (7,-9);
-	\fill[pink] (7,-1) rectangle (8,-2);
-	\fill[pink] (7,-2) rectangle (8,-3);
-	\fill[pink] (7,-3) rectangle (8,-4);
-	\fill[pink] (7,-4) rectangle (8,-5);
-	\node at (7.5,-5.5) {S};
-	\fill[pink] (7,-6) rectangle (8,-7);
-	\node at (7.5,-7.5) {A};
-	\fill[pink] (7,-8) rectangle (8,-9);
-	\node at (8.5,-2.5) {B};
-	\fill[pink] (8,-5) rectangle (9,-6);
-	\fill[pink] (8,-6) rectangle (9,-7);
-	\fill[pink] (8,-7) rectangle (9,-8);
-	\fill[pink] (8,-8) rectangle (9,-9);
-	\draw[very thick, step=1.0] (0,0) grid (9,-9);
-\end{tikzpicture}
+\input{unsolvable}
 \end{center}
 \begin{flushright}
 \textit{Legend:} \textbf{N}~--- Neo, \textbf{A}~--- Agent, \textbf{S}~--- Sentinel, \textbf{B}~--- Backdoor key, \textbf{K}~--- Keymaker, \tikz[baseline=0.1]{\fill[pink] (0,0) rectangle (0.3,0.3)}~--- a perceived cell.
@@ -549,7 +76,7 @@ A total of $1000$ tests were generated, out of which exactly 10 have no path to 
 \end{figure}
 
 \subsection{Algorithm comparison}
-The assignment does not give the definition of ``wins" and ``losses". To disambiguate, we shall call a ``loss" the situation where the Actor dies, or tries to make an invalid move, or gives a wrong answer. A ``win" shall be the opposite. We shall list the number of tests where an algorithm could not find a safe path to the Keymaker as a separate characteristic.
+In the table below, a ``win'' is defined as a situation where Neo can reach the Keymaker and the program can correctly determine the shortest distance to the goal.
 
 \begin{longtable}[c]{|c|c|c|c|c|c|}
 	\hline
@@ -558,19 +85,17 @@ The assignment does not give the definition of ``wins" and ``losses". To disambi
 	\endhead
 	\multicolumn{6}{|c|}{...}\\ \endfoot
 	\endlastfoot
-	\multirow{4}{3cm}{Execution time, $\mu s$} & Mean & 1243.06 & 1259.61 & 28814.73 & 1176.18 \\\cline{2-6}
-	& Mode & 1280 (7 times) & 1088 (6 times) & 1149 (9 times) & 1210 (8 times) \\\cline{2-6}
-	& Median & 1201 & 1214.5 & 1162 & 1165 \\\cline{2-6}
-	& SD & 223.19 & 241.83 & 624380.62 & 143.92 \\\hline
-	\multirow{4}{3cm}{Number of moves} & Mean & 11.35 & 11.35 & 1661.16 & 9.58 \\\cline{2-6}
-	& Mode & 9 (88 times) & 9 (88 times) & 9 (94 times) & 9 (93 times) \\\cline{2-6}
-	& Median & 8 & 8 & 9 & 9 \\\cline{2-6}
-	& SD & 10.73 & 10.73 & 37494.58 & 6.04 \\\hline
-	\multicolumn{2}{|c|}{Number of wins (correct answers)} & 1000 (100\%) & 1000 (100\%) & 865 (86.5\%) & 863 (86.3\%) \\\hline
-	\multicolumn{2}{|c|}{Number of losses (failed tests)} & 0 (0\%) & 0 (0\%) & 135 (13.5\%) & 137 (13.7\%) \\\hline
-	\multicolumn{2}{|c|}{Number of tests with a positive answer} & 990 (99\%) & 990 (99\%) & 990 (99\%) & 990 (99\%) \\\hline
-	\multicolumn{2}{|c|}{Number of tests with answer \texttt{-1}} & 10 (1\%) & 10 (1\%)  & 10 (1\%) & 10 (1\%) \\\hline
-	\multicolumn{2}{|c|}{Number of executions longer than 1 sec} & 0 (0\%) & 0 (0\%) & 4 (0.4\%) & 0 (0\%)\\\hline
+	\multirow{4}{3cm}{Execution time, $\mu s$} & Mean & 1243.06 & 1259.61 & 28100.18 & 30429.94 \\\cline{2-6}
+	& Mode & 1280 (7 times) & 1088 (6 times) & 1165 (3 times) & 1079 (2 times) \\\cline{2-6}
+	& Median & 1201 & 1214.5 & 5561.5 & 5998 \\\cline{2-6}
+	& SD & 223.19 & 241.83 & 82184.89 & 88253.63 \\\hline
+	\multirow{4}{3cm}{Number of moves} & Mean & 11.35 & 11.35 & 1650.51 & 1650.49 \\\cline{2-6}
+	& Mode & 9 (88 times) & 9 (88 times) & 11 (21 times) & 3 (21 times) \\\cline{2-6}
+	& Median & 8 & 8 & 266 & 266 \\\cline{2-6}
+	& SD & 10.73 & 10.73 & 5022.03 & 5022.03 \\\hline
+	\multicolumn{2}{|c|}{Number of wins} & 990 (99\%) & 990 (99\%) & 990 (99\%) & 990 (99\%) \\\hline
+	\multicolumn{2}{|c|}{Number of losses} & 10 (1\%) & 10 (1\%)  & 10 (1\%) & 10 (1\%) \\\hline
+	\multicolumn{2}{|c|}{Number of executions longer than 1 sec} & 0 (0\%) & 0 (0\%) & 1 (0.1\%) & 1 (0.1\%)\\\hline
 	
 \end{longtable}
 \begin{table}[!h]
@@ -578,6 +103,10 @@ The assignment does not give the definition of ``wins" and ``losses". To disambi
 \end{table}
 
 \subsection{Discussion}
+\subsection{Comparison of A* variants}
+Table \ref{comparison} shows a great similarity in each statistic of the two variants. However, the actual runtime of the program slightly increases as the field of view widens, although that may be a statistically insignificant increase. We may conclude that the variant of the problem has no effect on the optimality of decisions of the Actor, but it probably slows down Neo's perception.
+
+\subsection{Comparison of Backtracking variants}
 
 
 \end{document}
