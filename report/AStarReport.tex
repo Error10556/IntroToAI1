@@ -9,7 +9,6 @@
 
 \title{Report\\Assignment 1: The Matrix Universe}
 \author{Timur Usmanov, B23-ISE-01}
-\date{October 29, 2024}
 \maketitle
 
 \section*{Introduction}
@@ -103,10 +102,38 @@ In the table below, a ``win'' is defined as a situation where Neo can reach the 
 \end{table}
 
 \subsection{Discussion}
-\subsection{Comparison of A* variants}
-Table \ref{comparison} shows a great similarity in each statistic of the two variants. However, the actual runtime of the program slightly increases as the field of view widens, although that may be a statistically insignificant increase. We may conclude that the variant of the problem has no effect on the optimality of decisions of the Actor, but it probably slows down Neo's perception.
+The A* algorithm performs the same in both variants. Table \ref{comparison} shows a great similarity in each statistic of the two variants. However, the actual runtime of the program slightly increases as the field of view widens, although that may be a statistically insignificant increase. We conclude that the variant of the problem has no effect on the optimality of decisions of the Actor, but it probably slows down Neo's perception.
 
-\subsection{Comparison of Backtracking variants}
+The Backtracking algorithm, however, suffers from the slow-down of the large perception area. The mean runtime of the program increases by 2 ms if the second variant of the problem is being solved. This fact could be explained by the large number of moves the algorithm makes (compared to A*). However, in rare cases, the algorithm makes fewer moves when given an increased range of perception. Overall, the Backtracking algorithm can take advantage of the large field of view in terms of the number of queries, but needs more resources to do so.
 
+The Backtracking algorithm is totally inefficient in the worst cases. This is proven by the fact that the algorithm takes more than one second to solve test \#800 (see Fig. \ref{test800}).
+
+\begin{figure}[!h]
+\begin{center}
+	\begin{tikzpicture}[scale=0.4][baseline=0]
+		\node[above] at (4.5,0) {test800};
+		\node at (0.5,-0.5) {N};
+		\fill[pink] (0,-5) rectangle (1,-6);
+		\fill[pink] (0,-6) rectangle (1,-7);
+		\node at (0.5,-6.5) {S};
+		\fill[pink] (0,-7) rectangle (1,-8);
+		\node at (0.5,-7.5) {S};
+		\fill[pink] (0,-8) rectangle (1,-9);
+		\fill[pink] (1,-6) rectangle (2,-7);
+		\fill[pink] (1,-7) rectangle (2,-8);
+		\node at (3.5,-7.5) {B};
+		\fill[pink] (6,-6) rectangle (7,-7);
+		\fill[pink] (7,-5) rectangle (8,-6);
+		\node at (7.5,-6.5) {S};
+		\fill[pink] (7,-7) rectangle (8,-8);
+		\fill[pink] (8,-6) rectangle (9,-7);
+		\node at (8.5,-7.5) {K};
+		\draw[very thick, step=1.0] (0,0) grid (9,-9);
+	\end{tikzpicture}
+\end{center}
+\caption{The worst case out of 1000 for backtracking} \label{test800}
+\end{figure}
+
+Clearly, A* beats Backtracking in every way except for correctness. The runtime is consistently shorter, and the number of moves is less by several orders of magnitude. While Backtracking outputs the same answers, A* does it much faster and is arguably not more difficult to implement. Moreover, since the efficiency of Backtracking solely depends on the applicability of certain heuristics (which are not always applicable), A* does not; therefore, A* has the advantage of being consistently performant.
 
 \end{document}
